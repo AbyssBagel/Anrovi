@@ -31,5 +31,12 @@ def handle_disconnect():
   if user:
     emit("disconnected", {"username": user["username"]}, broadcast=True)
 
+# This function will be called when the client sends a message
+@socketio.on("send_message")
+def handle_message(data):
+  user = users.get(request.sid, None)
+  if user:
+    emit("new_message", {"username": user["username"], "message": data["message"]}, broadcast=True)
+
 if __name__ == '__main__':
   socketio.run(app)

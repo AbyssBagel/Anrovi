@@ -80,25 +80,11 @@ class MessagingApp(tk.Tk):
         if message:
             if self.current_conversation:
                 # Chiffrer message
-                encrypted_message = self.public_key.encrypt(
-                    message.encode(),
-                    padding.OAEP(
-                        mgf=padding.MGF1(algorithm=hashes.SHA256()),
-                        algorithm=hashes.SHA256(),
-                        label=None
-                    )
-                )
+                encrypted_message = self.encrypt_message(message)
                 self.conversations[self.current_conversation].append(f"Vous: {encrypted_message}")
 
                 # Déchiffrer message
-                decrypted_message = self.private_key.decrypt(
-                    encrypted_message,
-                    padding.OAEP(
-                        mgf=padding.MGF1(algorithm=hashes.SHA256()),
-                        algorithm=hashes.SHA256(),
-                        label=None
-                    )
-                ).decode('utf-8')
+                decrypted_message = self.decrypt_message(encrypted_message)
                 
                 # Afficher message dans zone de texte
                 self.messages_text.config(state=tk.NORMAL)
@@ -108,6 +94,30 @@ class MessagingApp(tk.Tk):
                 # Effacer champ de saisie
                 self.message_entry.delete(0, tk.END)
                 self.is_typing = False
+
+    # Chiffrement de message
+    def encrypt_message(self, message):
+        encrypted_message = self.public_key.encrypt(
+            message.encode(),
+            padding.OAEP(
+                mgf=padding.MGF1(algorithm=hashes.SHA256()),
+                algorithm=hashes.SHA256(),
+                label=None
+            )
+        )
+        return encrypted_message
+    
+    # Déchiffrement de message
+    def decrypt_message(self, message):
+        decrypted_message = self.private_key.decrypt(
+            message,
+            padding.OAEP(
+                mgf=padding.MGF1(algorithm=hashes.SHA256()),
+                algorithm=hashes.SHA256(),
+                label=None
+            )
+        )
+        return decrypted_message.decode('utf-8')
 
 
 

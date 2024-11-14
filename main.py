@@ -1,5 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
+from cryptography.hazmat.primitives.asymmetric import rsa, padding
+from cryptography.hazmat.primitives import serialization, hashes
 
 class MessagingApp(tk.Tk):
     def __init__(self):
@@ -8,6 +10,11 @@ class MessagingApp(tk.Tk):
         self.geometry("800x600")
         self.configure(bg="#e0e0e0")
 
+        # Génération de la paire de clés RSA
+        self.private_key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
+        self.public_key = self.private_key.public_key()
+
+        # Conversations fictives
         self.conversations = {
             "Alice": ["Alice: Salut, comment ça va?", "Vous: Ça va bien, merci! Et toi?", "Alice: Je vais bien aussi, merci!"],
             "Bob": ["Bob: Hey, tu es là?", "Vous: Oui, je suis là!"],
@@ -72,12 +79,27 @@ class MessagingApp(tk.Tk):
         message = self.message_entry.get()
         if message:
             if self.current_conversation:
-                self.conversations[self.current_conversation].append(f"Vous: {message}")
+                # Chiffrer message
+                encrypted_message = self.public_key.encrypt(
+                    message.encode(),
+                    padding.OAEP(
+                        mgf=padding.MGF1(algorithm=hashes.SHA256()),
+                        algorithm=hashes.SHA256(),
+                        label=None
+                    )
+                )
+                self.conversations[self.current_conversation].append(f"Vous: {encrypted_message}")
+                
+                # Afficher message dans zone de texte
                 self.messages_text.config(state=tk.NORMAL)
-                self.messages_text.insert(tk.END, f"Vous: {message}\n")
+                self.messages_text.insert(tk.END, f"Vous: {encrypted_message}\n")
                 self.messages_text.config(state=tk.DISABLED)
+                
+                # Effacer champ de saisie
                 self.message_entry.delete(0, tk.END)
                 self.is_typing = False
+
+
 
 if __name__ == "__main__":
     app = MessagingApp()

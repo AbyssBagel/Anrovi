@@ -12,7 +12,7 @@ users = {}
 def index():
   return render_template('index.html')
 
-# This function will be called when the client connect to the server
+# This function will be called when the client connects to the server
 @socketio.on("connect")
 def handle_connect():
   username = f"User_{random.randint(1000, 9999)}" # This is a random username
@@ -23,6 +23,13 @@ def handle_connect():
   emit("connected", {"username": username}, broadcast=True)
 
   emit("set_username", {"username": username})
+
+# This function will be called when the client disconnects from the server
+@socketio.on("disconnect")
+def handle_disconnect():
+  user = users.pop(request.sid, None)
+  if user:
+    emit("disconnected", {"username": user["username"]}, broadcast=True)
 
 if __name__ == '__main__':
   socketio.run(app)

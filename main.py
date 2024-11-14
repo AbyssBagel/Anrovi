@@ -89,10 +89,20 @@ class MessagingApp(tk.Tk):
                     )
                 )
                 self.conversations[self.current_conversation].append(f"Vous: {encrypted_message}")
+
+                # Déchiffrer message
+                decrypted_message = self.private_key.decrypt(
+                    encrypted_message,
+                    padding.OAEP(
+                        mgf=padding.MGF1(algorithm=hashes.SHA256()),
+                        algorithm=hashes.SHA256(),
+                        label=None
+                    )
+                ).decode('utf-8')
                 
                 # Afficher message dans zone de texte
                 self.messages_text.config(state=tk.NORMAL)
-                self.messages_text.insert(tk.END, f"Vous: {encrypted_message}\n")
+                self.messages_text.insert(tk.END, f"Vous: {decrypted_message}\n")
                 self.messages_text.config(state=tk.DISABLED)
                 
                 # Effacer champ de saisie

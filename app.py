@@ -39,7 +39,7 @@ def handle_message(data):
 
 # This function will be called when the client updates the username
 @socketio.on("update_username")
-def handle_message(data):
+def handle_username(data):
   user = users.get(request.sid, None)
   if user:
     old_username = users[request.sid]["username"]

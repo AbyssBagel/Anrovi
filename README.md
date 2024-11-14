@@ -8,7 +8,7 @@ on cmd : python -m venv .venv
 
 # Step 2 : Activate environment
 
-on cmd : .venv \Scripts\activate
+on cmd : .venv\Scripts\activate
 
 to quit : deactivate
 

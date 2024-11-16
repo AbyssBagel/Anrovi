@@ -4,3 +4,4 @@
 ## Python ##
 # Environment
 .venv
+__pycache__

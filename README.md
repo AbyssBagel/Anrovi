@@ -12,9 +12,11 @@ on cmd : .venv\Scripts\activate
 
 to quit : deactivate
 
-# Step 3 : Install flask
+# Step 3 : Create credentials (Data Base)
 
-on cmd : pip install flask flask_socketio
+on firebase.com (project) : go to -> Settings | Services accounts, next click on 'Python' and on 'Generate a new private key' (a file it downloaded)
+
+on editor : create a file 'credentials.json' (in the same directory as 'main.py') and put the content of the downloaded file into it
 
 # Step 4 : Launch app.py
 

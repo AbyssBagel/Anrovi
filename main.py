@@ -106,17 +106,18 @@ class MessagingApp(tk.Tk):
         message = self.message_entry.get()
         if message:
             if self.current_conversation:
-                print(self.current_conversation)
-                print(self.current_user)
-                print(self.conversations)
-                self.conversations.append({"from": self.current_user, "to": self.current_conversation, "message": message})
-                #self.conversations[self.current_conversation].append(f"Vous: {message}")
-                print(f"Message envoyé à {self.current_conversation}")
+                # Ajouter le message dans la bdd
+                bdd_projet = bdd.BaseDeDonnees()                
+                bdd_projet.add_message(self.current_user, self.current_conversation, message)
+            
+
+                # Mettre à jour l'affichage
                 self.messages_text.config(state=tk.NORMAL)
                 self.messages_text.insert(tk.END, f"Vous: {message}\n")
                 self.messages_text.config(state=tk.DISABLED)
                 self.message_entry.delete(0, tk.END)
                 self.is_typing = False
+
 
 
 if __name__ == "__main__":

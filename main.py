@@ -64,7 +64,7 @@ class MessagingApp(tk.Tk):
 
     def on_user_select(self, event):
         self.current_user = self.user_selection.get()
-        self.current_conversation = self.current_user
+        self.current_conversation = None
         print(f"Utilisateur sélectionné: {self.current_user}")
         self.update_conversations_list()
 
@@ -75,9 +75,11 @@ class MessagingApp(tk.Tk):
         for user in self.users:
             if user != self.current_user:
                 self.conversations_listbox.insert(tk.END, user)
-                self.conversations_listbox.select_set(0)
-                print(f"Conversation ajoutée: {user}")
-                self.display_conversation(self.conversations_listbox.get(0))
+        if self.conversations_listbox.size() > 0:
+            self.conversations_listbox.select_set(0)
+            self.current_conversation = self.conversations_listbox.get(0)
+            print(f"Conversation ajoutée: {user}")
+            self.display_conversation(self.conversations_listbox.get(0))
         print(f"Conversation actuelle affichée: {self.conversations_listbox.get(0)}")
 
     def on_conversation_select(self, event):
@@ -104,7 +106,11 @@ class MessagingApp(tk.Tk):
         message = self.message_entry.get()
         if message:
             if self.current_conversation:
-                self.conversations[self.current_conversation].append(f"Vous: {message}")
+                print(self.current_conversation)
+                print(self.current_user)
+                print(self.conversations)
+                self.conversations.append({"from": self.current_user, "to": self.current_conversation, "message": message})
+                #self.conversations[self.current_conversation].append(f"Vous: {message}")
                 print(f"Message envoyé à {self.current_conversation}")
                 self.messages_text.config(state=tk.NORMAL)
                 self.messages_text.insert(tk.END, f"Vous: {message}\n")

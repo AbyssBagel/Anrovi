@@ -16,7 +16,7 @@ class MessagingApp(tk.Tk):
 
         self.users = self.bdd_projet.get_users_name()
 
-        self.conversations = bdd_projet.get_conversations()
+        self.conversations = self.bdd_projet.get_conversations()
         
         # Génération de la paire de clés RSA
         self.private_key = rsa.generate_private_key(public_exponent=65537, key_size=2048)

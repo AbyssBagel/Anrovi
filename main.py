@@ -12,15 +12,16 @@ class MessagingApp(tk.Tk):
         self.geometry("1000x800")
         self.configure(bg="#e0e0e0")
 
-        bdd_projet = bdd.BaseDeDonnees()
+        self.bdd_projet = bdd.BaseDeDonnees()
 
-        self.users = bdd_projet.get_users_name()
-        
+        self.users = self.bdd_projet.get_users_name()
+
         self.conversations = bdd_projet.get_conversations()
         
         # Génération de la paire de clés RSA
         self.private_key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
         self.public_key = self.private_key.public_key()
+
 
         self.is_typing = False
         self.current_user = None
@@ -99,6 +100,7 @@ class MessagingApp(tk.Tk):
     def display_conversation(self, conversation):
         self.messages_text.config(state=tk.NORMAL)
         self.messages_text.delete(1.0, tk.END)
+        self.conversations = self.bdd_projet.get_conversations()
         for message in self.conversations:
             if message["from"] == self.current_user and message["to"] == conversation:
                 self.messages_text.insert(tk.END, f"Vous: {message['message']}\n")
@@ -134,7 +136,6 @@ class MessagingApp(tk.Tk):
                 self.is_typing = False
 
 
-
     # Chiffrement de message
     def encrypt_message(self, message):
         encrypted_message = self.public_key.encrypt(
@@ -159,7 +160,6 @@ class MessagingApp(tk.Tk):
             )
         )
         return decrypted_message.decode('utf-8')
-
 
 
 if __name__ == "__main__":

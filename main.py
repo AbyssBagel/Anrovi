@@ -1,7 +1,9 @@
 import tkinter as tk
 from tkinter import ttk
-
 import bdd
+from cryptography.hazmat.primitives.asymmetric import rsa, padding
+from cryptography.hazmat.primitives import serialization, hashes
+import base64
 
 class MessagingApp(tk.Tk):
     def __init__(self):
@@ -13,8 +15,13 @@ class MessagingApp(tk.Tk):
         self.bdd_projet = bdd.BaseDeDonnees()
 
         self.users = self.bdd_projet.get_users_name()
+
+        self.conversations = bdd_projet.get_conversations()
         
-        self.conversations = self.bdd_projet.get_conversations()
+        # Génération de la paire de clés RSA
+        self.private_key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
+        self.public_key = self.private_key.public_key()
+
 
         self.is_typing = False
         self.current_user = None
@@ -107,17 +114,53 @@ class MessagingApp(tk.Tk):
         message = self.message_entry.get()
         if message:
             if self.current_conversation:
+                # Mettre à jour l'affichage
+                # Chiffrer message
+                encrypted_message = self.encrypt_message(message)
+
                 # Ajouter le message dans la bdd
                 bdd_projet = bdd.BaseDeDonnees()                
-                bdd_projet.add_message(self.current_user, self.current_conversation, message)
-            
+                bdd_projet.add_message(self.current_user, self.current_conversation, encrypted_message)
 
-                # Mettre à jour l'affichage
+                # Déchiffrer message
+                decrypted_message = self.decrypt_message(encrypted_message)
+                
+                # Afficher message dans zone de texte
                 self.messages_text.config(state=tk.NORMAL)
-                self.messages_text.insert(tk.END, f"Vous: {message}\n")
+                self.messages_text.insert(tk.END, f"Vous: {encrypted_message}\n")
+                self.messages_text.insert(tk.END, f"Vous: {decrypted_message}\n")
                 self.messages_text.config(state=tk.DISABLED)
+                
+                # Effacer champ de saisie
                 self.message_entry.delete(0, tk.END)
                 self.is_typing = False
+
+
+    # Chiffrement de message
+    def encrypt_message(self, message):
+        encrypted_message = self.public_key.encrypt(
+            message.encode(),
+            padding.OAEP(
+                mgf=padding.MGF1(algorithm=hashes.SHA256()),
+                algorithm=hashes.SHA256(),
+                label=None
+            )
+        )
+        return base64.b64encode(encrypted_message).decode('utf-8')
+    
+    # Déchiffrement de message
+    def decrypt_message(self, message):
+        encrypted_message = base64.b64decode(message)
+        decrypted_message = self.private_key.decrypt(
+            encrypted_message,
+            padding.OAEP(
+                mgf=padding.MGF1(algorithm=hashes.SHA256()),
+                algorithm=hashes.SHA256(),
+                label=None
+            )
+        )
+        return decrypted_message.decode('utf-8')
+
 
 if __name__ == "__main__":
     app = MessagingApp()

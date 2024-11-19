@@ -4,3 +4,7 @@
 ## Python ##
 # Environment
 .venv
+__pycache__
+
+## Credentials ##
+credentials.json

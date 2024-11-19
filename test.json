@@ -1,0 +1,93 @@
+{
+    "users": [
+        {
+            "name": "Alice",
+            "age": 25
+        },
+        {
+            "name": "Bob",
+            "age": 30
+        },
+        {
+            "name": "Charlie",
+            "age": 35
+        }
+    ],
+    "conversations": [
+        {
+            "from": "Alice",
+            "to": "Bob",
+            "message": "Salut, comment ça va ?"
+        },
+        {
+            "from": "Bob",
+            "to": "Alice",
+            "message": "Yoo, ça va bien et toi ?"
+        },
+        {
+            "from": "Alice",
+            "to": "Bob",
+            "message": "Oui ça va, tu fais quoi ?"
+        },
+        {
+            "from": "Bob",
+            "to": "Alice",
+            "message": "Je suis en train de coder, et toi ?"
+        },
+        {
+            "from": "Alice",
+            "to": "Bob",
+            "message": "Je suis en train de lire un livre"
+        },
+        {
+            "from": "Bob",
+            "to": "Alice",
+            "message": "Cool, quel livre ?"
+        },
+        {
+            "from": "Alice",
+            "to": "Bob",
+            "message": "Le Seigneur des Anneaux"
+        },
+        {
+            "from": "Bob",
+            "to": "Alice",
+            "message": "Ah, je l'ai déjà lu, il est génial !"
+        },
+        {
+            "from": "Alice",
+            "to": "Bob",
+            "message": "Oui, je suis d'accord"
+        },
+        {
+            "from": "Charlie",
+            "to": "Alice",
+            "message": "Salut, tu fais quoi ?"
+        },
+        {
+            "from": "Alice",
+            "to": "Charlie",
+            "message": "Je lis un livre"
+        },
+        {
+            "from": "Charlie",
+            "to": "Alice",
+            "message": "Cool, quel livre ?"
+        },
+        {
+            "from": "Alice",
+            "to": "Charlie",
+            "message": "Le Seigneur des Anneaux"
+        },
+        {
+            "from": "Charlie",
+            "to": "Alice",
+            "message": "Ah, je l'ai déjà lu, il est génial !"
+        },
+        {
+            "from": "Alice",
+            "to": "Charlie",
+            "message": "Oui, je suis d'accord"
+        }
+    ]
+}

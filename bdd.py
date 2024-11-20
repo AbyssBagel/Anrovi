@@ -12,22 +12,24 @@ class BaseDeDonnees:
         self.ref = db.reference("/")
 
     # Getters
+    def getAll(self):
+        return self.ref.get()
+
     def get_users(self):
         return self.ref.child("users").get()
     
     def get_users_name(self):
         users = self.get_users()
         users_name = []
-        for _, user_info in users.items():
-            if isinstance(user_info, dict) and "name" in user_info:
-                users_name.append(user_info["name"])
+        for user in users:
+            users_name.append(user["name"])
         return users_name
     
     def get_pub_key(self, user_name):
         users = self.get_users()
-        for _, user_info in users.items():
-            if user_info["name"] == user_name:
-                return user_info["pub_key"]
+        for user in users:
+            if user["name"] == user_name:
+                return user["pub_key"]
         return None
     
     def get_conversations(self):

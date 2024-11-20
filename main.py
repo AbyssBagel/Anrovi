@@ -17,6 +17,7 @@ class MessagingApp(tk.Tk):
         self.bdd_projet = bdd.BaseDeDonnees()
 
         self.users = self.bdd_projet.get_users_name()
+        print(self.users)
 
         self.conversations = self.bdd_projet.get_conversations()
 
@@ -59,7 +60,7 @@ class MessagingApp(tk.Tk):
         self.message_entry.bind("<Key>", self.on_typing)
 
         # Bouton d'envoi
-        self.send_button = tk.Button(self.entry_frame, text="Envoyer", bg="#4CAF50", fg="#ffffff", font=("Helvetica", 12), command=self.send_message)
+        self.send_button = tk.Button(self.entry_frame, text="Envoyer", bg="#4cAf50", fg="#ffffff", font=("Helvetica", 12), command=self.send_message)
         self.send_button.pack(side=tk.RIGHT, padx=10, pady=10)
 
         # Afficher les conversations de l'utilisateur actuel
@@ -81,7 +82,6 @@ class MessagingApp(tk.Tk):
         if self.conversations_listbox.size() > 0:
             self.conversations_listbox.select_set(0)
             self.current_conversation = self.conversations_listbox.get(0)
-            print(f"Conversation ajoutée: {user}")
             self.display_conversation(self.conversations_listbox.get(0))
         print(f"Conversation actuelle affichée: {self.conversations_listbox.get(0)}")
 
@@ -98,10 +98,15 @@ class MessagingApp(tk.Tk):
         self.messages_text.delete(1.0, tk.END)
         self.conversations = self.bdd_projet.get_conversations()
         for message in self.conversations:
-            if message["from"] == self.current_user and message["to"] == conversation:
-                self.messages_text.insert(tk.END, f"Vous: {message['message']}\n")
-            elif message["from"] == conversation and message["to"] == self.current_user:
-                self.messages_text.insert(tk.END, f"{conversation}: {message['message']}\n")
+            if message == None:
+                continue
+            elif message["encryptedBy"] == self.current_user:
+                # Déchiffrer message
+                message_dechiffre = self.decrypt_message(message["message"], "private_key.asc")
+                if message["from"] == self.current_user and message["to"] == conversation:
+                    self.messages_text.insert(tk.END, f"Vous: {message_dechiffre}\n")
+                elif message["from"] == conversation and message["to"] == self.current_user:
+                    self.messages_text.insert(tk.END, f"{conversation}: {message_dechiffre}\n")
 
     def on_typing(self, event):
         self.is_typing = True
@@ -112,22 +117,21 @@ class MessagingApp(tk.Tk):
             if self.current_conversation:
                 # Mettre à jour l'affichage
                 # Chiffrer message
-
-                pub_key = self.bdd_projet.get_pub_key(self.current_user)
-                print(pub_key)
-
-                encrypted_message = self.encrypt_message(message, pub_key)
+                pub_key_current_user = self.bdd_projet.get_pub_key(self.current_user)
+                pub_key_current_conversation = self.bdd_projet.get_pub_key(self.current_conversation)
+                encrypted_message_current_user = self.encrypt_message(message, pub_key_current_user)
+                encrypted_message_current_conversation = self.encrypt_message(message, pub_key_current_conversation)
 
                 # Ajouter le message dans la bdd          
-                self.bdd_projet.add_message(self.current_user, self.current_conversation, encrypted_message, self.current_user)
-                self.bdd_projet.add_message(self.current_user, self.current_conversation, encrypted_message, self.current_conversation)
+                self.bdd_projet.add_message(self.current_user, self.current_conversation, encrypted_message_current_user, self.current_user)
+                self.bdd_projet.add_message(self.current_user, self.current_conversation, encrypted_message_current_conversation, self.current_conversation)
 
                 # Déchiffrer message
-                decrypted_message = self.decrypt_message(encrypted_message, "private_key.asc")
+                decrypted_message = self.decrypt_message(encrypted_message_current_user, "private_key.asc")
                 
                 # Afficher message dans zone de texte
                 self.messages_text.config(state=tk.NORMAL)
-                self.messages_text.insert(tk.END, f"Vous: {encrypted_message}\n")
+                # self.messages_text.insert(tk.END, f"Vous: {encrypted_message}\n")
                 self.messages_text.insert(tk.END, f"Vous: {decrypted_message}\n")
                 self.messages_text.config(state=tk.DISABLED)
                 

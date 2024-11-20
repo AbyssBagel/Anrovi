@@ -18,7 +18,11 @@ on firebase.com (project) : go to -> Settings | Services accounts, next click on
 
 on editor : create a file 'credentials.json' (in the same directory as 'main.py') and put the content of the downloaded file into it
 
-# Step 4 : Launch app.py
+# Step 4 : Upload your private key
+
+on editor : create a file 'private_key.asc' in the project root directory and copy / paste your private key into it
+
+# Step 5 : Launch app.py
 
 Windows : python .\app.py
 Mac/Linux : python3 .\app.py

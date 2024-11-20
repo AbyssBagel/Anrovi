@@ -3,6 +3,8 @@ from tkinter import ttk
 import bdd
 from cryptography.hazmat.primitives.asymmetric import rsa, padding
 from cryptography.hazmat.primitives import serialization, hashes
+from pgpy import PGPKey
+import pgpy
 import base64
 
 class MessagingApp(tk.Tk):
@@ -17,16 +19,10 @@ class MessagingApp(tk.Tk):
         self.users = self.bdd_projet.get_users_name()
 
         self.conversations = self.bdd_projet.get_conversations()
-        
-        # Génération de la paire de clés RSA
-        self.private_key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
-        self.public_key = self.private_key.public_key()
-
 
         self.is_typing = False
         self.current_user = None
         self.current_conversation = None
-        print(f"Utilisateur actuel: {self.current_user}")
 
         self.create_widgets()
 
@@ -116,14 +112,18 @@ class MessagingApp(tk.Tk):
             if self.current_conversation:
                 # Mettre à jour l'affichage
                 # Chiffrer message
-                encrypted_message = self.encrypt_message(message)
 
-                # Ajouter le message dans la bdd
-                bdd_projet = bdd.BaseDeDonnees()                
-                bdd_projet.add_message(self.current_user, self.current_conversation, encrypted_message)
+                pub_key = self.bdd_projet.get_pub_key(self.current_user)
+                print(pub_key)
+
+                encrypted_message = self.encrypt_message(message, pub_key)
+
+                # Ajouter le message dans la bdd          
+                self.bdd_projet.add_message(self.current_user, self.current_conversation, encrypted_message, self.current_user)
+                self.bdd_projet.add_message(self.current_user, self.current_conversation, encrypted_message, self.current_conversation)
 
                 # Déchiffrer message
-                decrypted_message = self.decrypt_message(encrypted_message)
+                decrypted_message = self.decrypt_message(encrypted_message, "private_key.asc")
                 
                 # Afficher message dans zone de texte
                 self.messages_text.config(state=tk.NORMAL)
@@ -135,10 +135,15 @@ class MessagingApp(tk.Tk):
                 self.message_entry.delete(0, tk.END)
                 self.is_typing = False
 
-
     # Chiffrement de message
-    def encrypt_message(self, message):
-        encrypted_message = self.public_key.encrypt(
+    def encrypt_message(self, message, pub_key):
+        # Convertir la clé publique en un objet utilisable
+        rsa_pub_key = serialization.load_pem_public_key(
+            pub_key.encode('utf-8')
+        )
+        
+        # Chiffrer le message avec la clé publique RSA
+        encrypted_message = rsa_pub_key.encrypt(
             message.encode(),
             padding.OAEP(
                 mgf=padding.MGF1(algorithm=hashes.SHA256()),
@@ -149,10 +154,17 @@ class MessagingApp(tk.Tk):
         return base64.b64encode(encrypted_message).decode('utf-8')
     
     # Déchiffrement de message
-    def decrypt_message(self, message):
-        encrypted_message = base64.b64decode(message)
-        decrypted_message = self.private_key.decrypt(
-            encrypted_message,
+    def decrypt_message(self, encrypted_message, private_key_path):
+        # Charger la clé privée à partir du fichier
+        with open(private_key_path, "rb") as key_file:
+            rsa_priv_key = serialization.load_pem_private_key(
+                key_file.read(),
+                password=None
+            )
+        
+        # Déchiffrer le message avec la clé privée RSA
+        decrypted_message = rsa_priv_key.decrypt(
+            base64.b64decode(encrypted_message),
             padding.OAEP(
                 mgf=padding.MGF1(algorithm=hashes.SHA256()),
                 algorithm=hashes.SHA256(),
@@ -160,8 +172,7 @@ class MessagingApp(tk.Tk):
             )
         )
         return decrypted_message.decode('utf-8')
-
-
+    
 if __name__ == "__main__":
     app = MessagingApp()
     app.mainloop()

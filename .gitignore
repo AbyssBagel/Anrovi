@@ -6,5 +6,6 @@
 .venv
 __pycache__
 
-## Credentials ##
+## Private ##
 credentials.json
+private_key.asc

@@ -6,6 +6,7 @@ from cryptography.hazmat.primitives import serialization, hashes
 from pgpy import PGPKey
 import pgpy
 import base64
+import time
 
 class MessagingApp(tk.Tk):
     def __init__(self):
@@ -94,6 +95,7 @@ class MessagingApp(tk.Tk):
         self.display_conversation(selected_conversation)
 
     def display_conversation(self, conversation):
+        start_time = time.time()
         self.messages_text.config(state=tk.NORMAL)
         self.messages_text.delete(1.0, tk.END)
         self.conversations = self.bdd_projet.get_conversations()
@@ -107,6 +109,9 @@ class MessagingApp(tk.Tk):
                     self.messages_text.insert(tk.END, f"Vous: {message_dechiffre}\n")
                 elif message["from"] == conversation and message["to"] == self.current_user:
                     self.messages_text.insert(tk.END, f"{conversation}: {message_dechiffre}\n")
+        self.messages_text.config(state=tk.DISABLED)
+        end_time = time.time()
+        print(f"Temps pour récupérer conversation : {end_time - start_time:.4f}s")
 
     def on_typing(self, event):
         self.is_typing = True
@@ -114,6 +119,7 @@ class MessagingApp(tk.Tk):
     def send_message(self):
         message = self.message_entry.get()
         if message:
+            start_time = time.time()
             if self.current_conversation:
                 # Mettre à jour l'affichage
                 # Chiffrer message
@@ -138,6 +144,9 @@ class MessagingApp(tk.Tk):
                 # Effacer champ de saisie
                 self.message_entry.delete(0, tk.END)
                 self.is_typing = False
+
+            end_time = time.time()
+            print(f"Temps pour envoyer message : {end_time - start_time:.4f}s")
 
     # Chiffrement de message
     def encrypt_message(self, message, pub_key):
